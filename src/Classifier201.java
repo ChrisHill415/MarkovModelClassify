@@ -80,7 +80,7 @@ public class Classifier201 {
                 debug(String.format("training %14s\t",dName));
                                
                 // second parameter to model constructor: true = memoize, false no memoize  
-                ClassifyingModel model = new ClassifyingModel(mySize,false);
+                ClassifyingModel model = new ClassifyingModel(mySize,true);//changed
                 model.trainDirectory(trainDir);
                 myModels.put(dName,model);
 

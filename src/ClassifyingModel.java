@@ -15,7 +15,8 @@ public class ClassifyingModel extends BaseMarkovModel{
     private boolean myUseMemo;
 
     public ClassifyingModel(int size) {
-        this(size,false);
+        this(size,true);
+        myCache = new HashMap<>();
     }
 
     public ClassifyingModel(int size, boolean memoize) {
@@ -23,11 +24,12 @@ public class ClassifyingModel extends BaseMarkovModel{
         myUseMemo = memoize;
         myMap = new HashMap<>();
         myVocabulary = new HashSet<>();
+        myCache = new HashMap<>();
     }
 
     private int tokenInContextCount(List<String> context, String token) {
         if (! myMap.containsKey(context)) return 0;
-        if (myUseMemo && myCache.get(context).containsKey(token)){
+        if (myUseMemo && myCache.getOrDefault(context, new HashMap<>()).containsKey(token)){
             return myCache.get(context).get(token);
     }
         int count = 0;
@@ -40,7 +42,7 @@ public class ClassifyingModel extends BaseMarkovModel{
             myCache.get(context).put(token,count);
         else if(myUseMemo)
         {
-            Map<String,Integer> test = new TreeMap<>();
+            Map<String,Integer> test = new HashMap<>();
             test.put(token,count);
             myCache.put(context,(test));
         }
