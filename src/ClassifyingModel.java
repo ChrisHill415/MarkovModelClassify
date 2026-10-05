@@ -1,7 +1,6 @@
+import java.io.*;
 import java.util.*;
 import java.util.regex.*;
-
-import java.io.*;
 
 /**
  * @author: ADD YOUR NAME HERE 201 STUDENT
@@ -12,6 +11,7 @@ public class ClassifyingModel extends BaseMarkovModel{
 
     private HashMap<List<String>, List<String>> myMap;
     private HashSet<String> myVocabulary;
+    private Map<List<String>, Map<String,Integer>> myCache;
     private boolean myUseMemo;
 
     public ClassifyingModel(int size) {
@@ -27,12 +27,22 @@ public class ClassifyingModel extends BaseMarkovModel{
 
     private int tokenInContextCount(List<String> context, String token) {
         if (! myMap.containsKey(context)) return 0;
-        
+        if (myUseMemo && myCache.get(context).containsKey(token)){
+            return myCache.get(context).get(token);
+    }
         int count = 0;
         for(String s : myMap.get(context)) {
             if (s.equals(token)) {
                 count += 1;
             }
+        }
+        if(myUseMemo && myCache.containsKey(context))
+            myCache.get(context).put(token,count);
+        else if(myUseMemo)
+        {
+            Map<String,Integer> test = new TreeMap<>();
+            test.put(token,count);
+            myCache.put(context,(test));
         }
         return count;
     }
@@ -96,16 +106,19 @@ public class ClassifyingModel extends BaseMarkovModel{
         List<String> padded = createTokenizedText(text);
         HashSet<List<String>> set = new HashSet<>();
         double probTotal = 0.0;
-
+        int contextCount = 0;
+        int nextCount = 0;
 
         for(int k=0; k < padded.size() - myModelSize; k++) {
             List<String> context = padded.subList(k, k+myModelSize);
             String next = padded.get(k+myModelSize);
+            contextCount = myMap.getOrDefault(context, new ArrayList<>()).size();
             set.add(context);
-            double prob = 0.5; // this will be replaced by appropriate calculations/values
+            nextCount = tokenInContextCount(context, next);
+            double prob = (nextCount + smoother)/(contextCount + smoother * vocabularySize()); // this will be replaced by appropriate calculations/values
             probTotal += Math.log(prob);
         }
-        return probTotal;  // must be normalized
+        return probTotal/set.size();  // must be normalized
     }
 
     @Override
