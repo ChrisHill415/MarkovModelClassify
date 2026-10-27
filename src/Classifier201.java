@@ -163,7 +163,7 @@ public class Classifier201 {
     public static void main(String[] args) throws IOException {
         Classifier201 classifier = new Classifier201(1,true); 
         String training = "data";
-        String identify = "identify";
+        String identify = "newauthors";
         //identify = "newauthors";
         classifier.traindAndIdentify(training,identify);
        
